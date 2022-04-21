@@ -1,6 +1,7 @@
 #!/bin/bash
 # download sslscan
 # curl -sLO http://archive.ubuntu.com/ubuntu/pool/universe/s/sslscan/sslscan_2.0.7-1_amd64.deb && sudo dpkg -i sslscan_2.0.7-1_amd64.deb && rm -r sslscan_2.0.7-1_amd64.deb
+# https://github.com/rbsec/sslscan
 pwd=$(pwd)
 checkapt(){
     command -v "$1" >/dev/null 2>&1
@@ -62,7 +63,6 @@ if curl --output /dev/null --silent --head --fail "$d0mainNumb"; then
 	gnt4=$(gnome-terminal --geometry=87x21 -- sh -c "$cmd4; echo \"Your target : $d0mainNumb\"; ${SHELL:-bash}");
   exitcode=$?;
   #create PEM
-  testssl -p -s -f -U -S -P --jsonfile-pretty="$pathfulld0mainNumb/SSL.json" $d0mainNumb 
   openssl s_client -showcerts -connect $d0mainNumb:443 </dev/null 2>/dev/null|openssl x509 -outform PEM > "$pathfulld0mainNumb/REAL-SSL-CERT-$d0mainNumb.pem"
   openssl s_client -showcerts -connect $d0mainNumb:443 -servername $d0mainNumb  </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > "$pathfulld0mainNumb/REAL-SSL-CERT-FULL-$d0mainNumb.pem"
   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out $pathfulld0mainNumb/private-key.pem
@@ -75,7 +75,7 @@ if curl --output /dev/null --silent --head --fail "$d0mainNumb"; then
 \e[30;38;5;120m[ next ]\e[0m\e[1;37m enter information that will be incorporated \e[30;38;5;120m$d0mainNumb\e[0m
 
 "
-  openssl req -newkey rsa:2048 -nodes -keyout "$pathfulld0mainNumb/KEY_$d0mainNumb.key" -x509 -days 1000 -subj '/CN=www.$d0mainNumb/O=$d0mainNumb/C=IN' -out "$pathfulld0mainNumb/CN_$d0mainNumb.crt"
+  openssl req -newkey rsa:2048 -nodes -keyout "$pathfulld0mainNumb/KEY_$d0mainNumb.key" -x509 -days 1000 -subj "/CN=www.$d0mainNumb/O=$d0mainNumb/C=IN" -out "$pathfulld0mainNumb/CN_$d0mainNumb.crt"
   openssl req -new -x509 -key $pathfulld0mainNumb/private-key.pem -out $pathfulld0mainNumb/cert.pem -days 360
   #generate password
   openssl pkcs12 -export -inkey $pathfulld0mainNumb/private-key.pem -in $pathfulld0mainNumb/cert.pem -out $pathfulld0mainNumb/cert.pfx
@@ -88,6 +88,7 @@ if curl --output /dev/null --silent --head --fail "$d0mainNumb"; then
   openssl md5 "$pathfulld0mainNumb/REAL-SSL-CERT-FULL-$d0mainNumb.pem"
   openssl dgst -sha1 "$pathfulld0mainNumb/REAL-SSL-CERT-FULL-$d0mainNumb.pem"
   openssl dgst -sha384 "$pathfulld0mainNumb/REAL-SSL-CERT-FULL-$d0mainNumb.pem"
+  testssl -p -s -f -U -S -P --jsonfile-pretty="$pathfulld0mainNumb/SSL.json" $d0mainNumb 
   printf """
     \e[30;48;5;118m┌────────────────────────────────────────┐\e[0m
     \e[30;48;5;118m│       ▄▄                               │\e[0m
